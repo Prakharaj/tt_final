@@ -18,7 +18,8 @@
         }
         .container {
             width: 90%;
-            max-width: 800px;
+            max-width: 90%;
+;
             background: white;
             padding: 20px;
             box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
@@ -42,7 +43,7 @@
         }
         .form-group input[type="text"],
         .form-group input[type="number"] {
-            width: calc(100% - 60px);
+            width: calc(100% - 20px);
             padding: 10px;
             border: 1px solid #ddd;
             border-radius: 5px;
@@ -75,18 +76,18 @@
             background-color: #f2f2f2;
             font-weight: 700;
         }
-        .download-link {
+        /* .download-link {
             display: block;
             margin: 20px 0;
             text-align: center;
             font-size: 1.2em;
-            color: #007bff;
+            color: #000000;
             text-decoration: none;
             font-weight: 500;
-        }
-        .download-link:hover {
+        } */
+        /* .download-link:hover {
             text-decoration: underline;
-        }
+        } */
     </style>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 
@@ -99,7 +100,7 @@
     <div class="form-group">
         <label for="numCourses">Number of Courses:</label>
         <input type="number" id="numCourses" min="1" required>
-        <button onclick="generateInputFields()">Generate Fields</button>
+        <button id="generateFieldsButton" onclick="generateInputFields()">Generate Fields</button>
     </div>
 
     <div id="courseFields"></div>
@@ -238,7 +239,7 @@
         <tbody>
             <tr>
                 <th>Mon</th>
-            <td>Blockchain and Web3 Development, Data Analytics I, Earthquake Resistant Design of Masonry Structures, Probability and Random Processes, Thinking and Knowing in the Human Sciences – III, CMOS References and Regulators</td>
+            <td>Blockchain and Web3 Development <b>H101</b>, Data Analytics I <b>H205</b>, Earthquake Resistant Design of Masonry Structures <b>H102</b>, Probability and Random Processes <b>H103</b>, Thinking and Knowing in the Human Sciences III <b>H201</b>, CMOS References and Regulators <b>H202</b> </td>
             <td>Introduction to Biology, Introduction to Quantum Field Theory, Operating Systems and Networks (OSN), Signal Processing, Structural Dynamics, Topics in Nanosciences, Retrofit of Existing Infrastructure(H2), Software Systems Development</td>
             <td>Advanced Computer Architecture, Behavioral Research & Experimental Design, Digital Image Processing, Distributed Systems, Environmental Science & Technology, Language and Society, Theory of Elasticity, Science 1, Quantum Mechanics, Hydrological modelling and Software Development</td>
             <td>Learning and Memory, Structural Engineering Design Studio, Topics in Applied Optimization, Quantum Information Theory, Open Quantum Systems and Quantum Thermodynamics</td>
@@ -319,71 +320,123 @@
     }
 
     function showSuggestions(event) {
-        const input = event.target;
-        const value = input.value.toLowerCase();
-        const suggestions = document.getElementById('courseSuggestions');
+    const input = event.target;
+    const value = input.value.toLowerCase();
+    const suggestions = document.getElementById('courseSuggestions');
 
-        suggestions.innerHTML = '';
+    suggestions.innerHTML = '';
+    input.setCustomValidity(''); // Clear previous custom validation messages
 
-        if (value) {
-            const filteredCourses = allCourses.filter(course => 
-                course.toLowerCase().includes(value)
-            );
+    if (value) {
+        const filteredCourses = allCourses.filter(course => 
+            course.toLowerCase().includes(value)
+        );
 
+        if (filteredCourses.length > 0) {
             filteredCourses.forEach(course => {
                 const option = document.createElement('option');
                 option.value = course;
                 suggestions.appendChild(option);
             });
+        } else {
+            // Set a custom validation message if no matches are found
+            input.setCustomValidity('Course not Found');
         }
     }
+    input.reportValidity(); // Trigger the custom validity message if any
+}
+
+
+
+
+function hasInvalidCourses() {
+    const courseInputs = document.querySelectorAll('.courseInput');
+    let hasInvalid = false;
+
+    courseInputs.forEach(input => {
+        if (input.validationMessage) { // Check if there's a custom validation message
+            hasInvalid = true;
+        }
+    });
+
+    return hasInvalid;
+}
+
+
+
+
+
+
+
 
     function generateTimetable() {
-        const courseInputs = document.querySelectorAll('.courseInput');
-        const courses = Array.from(courseInputs).map(input => input.value);
 
-        let filteredTimetable = timetableHTML;
-        const parser = new DOMParser();
-        const dom = parser.parseFromString(filteredTimetable, 'text/html');
-        const rows = dom.querySelectorAll('tbody tr');
 
-        rows.forEach(row => {
-            const cells = row.querySelectorAll('td');
-            cells.forEach(cell => {
-                if (cell.textContent.trim()) {
-                    const cellCourses = cell.textContent.split(',').map(course => course.trim());
-                    const matchingCourses = cellCourses.filter(course => courses.includes(course));
-                    cell.textContent = matchingCourses.join(', ');
-                }
-            });
-        });
 
-        const timetableContainer = document.getElementById('timetableContainer');
-        timetableContainer.innerHTML = dom.body.innerHTML;
-
-        const downloadLink = document.createElement('a');
-        downloadLink.textContent = 'Download PDF';
-        downloadLink.classList.add('download-link');
-        downloadLink.onclick = () => downloadPDF(dom);
-        timetableContainer.appendChild(downloadLink);
+        if (hasInvalidCourses()) {
+        alert('Please correct all "Course not Found" errors before generating the timetable.');
+        return; // Stop execution if there are invalid inputs
     }
 
-    async function downloadPDF(dom) {
-    const { jsPDF } = window.jspdf;
-    const pdf = new jsPDF();
+    
+    const courseInputs = document.querySelectorAll('.courseInput');
+    const courses = Array.from(courseInputs).map(input => input.value.trim());
 
-    // Use the html method to convert the HTML to PDF
-    pdf.html(dom.body, {
-        callback: function (pdf) {
-            pdf.save('timetable.pdf');
-        },
-        x: 10,
-        y: 10,
-        html2canvas: { scale: 2 }, // Adjust the scale if needed
+    // Escape specific course name to use in regex
+    const specificCourseName = 'Work, Entrepreneurship and Technology in Contemporary Societies';
+    const placeholder = 'Work|Entrepreneurship and Technology in Contemporary Societies';
+
+    let filteredTimetable = timetableHTML;
+    const parser = new DOMParser();
+    const dom = parser.parseFromString(filteredTimetable, 'text/html');
+    const rows = dom.querySelectorAll('tbody tr');
+
+    rows.forEach(row => {
+        const cells = row.querySelectorAll('td');
+        cells.forEach(cell => {
+            if (cell.textContent.trim()) {
+                // Replace the specific course name with a placeholder
+                let cellContent = cell.textContent.replace(
+                    new RegExp(specificCourseName, 'g'),
+                    placeholder
+                );
+
+                // Split the cell content by commas
+                const cellCourses = cellContent.split(',').map(course => course.trim());
+
+                // Filter courses to match user input
+                const matchingCourses = cellCourses.filter(course => courses.some(userCourse => {
+                    // Restore the original comma in the specific course name
+                    const restoredCourse = course.replace(placeholder, specificCourseName);
+                    return userCourse === restoredCourse;
+                }));
+
+                // Join the matching courses and replace placeholder back to original
+                cell.textContent = matchingCourses.join(', ').replace(
+                    new RegExp(placeholder, 'g'),
+                    specificCourseName
+                );
+            }
+        });
     });
+
+    const timetableContainer = document.getElementById('timetableContainer');
+    timetableContainer.innerHTML = dom.body.innerHTML;
 }
+
+
+  
+// Add event listener to trigger the generateInputFields function on Enter key press
+document.getElementById('numCourses').addEventListener('keypress', function (event) {
+    if (event.key === 'Enter') { // Check if the Enter key is pressed
+        event.preventDefault(); // Prevent default form submission
+        document.getElementById('generateFieldsButton').click(); // Programmatically click the button
+    }
+});
 
     
 </script>
 </body>
 </html>
+
+
