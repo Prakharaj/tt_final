@@ -18,13 +18,13 @@
         }
         .container {
             width: 90%;
-            max-width: 90%;
-;
+            max-width: 1200px;
             background: white;
             padding: 20px;
             box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
             margin-top: 50px;
             border-radius: 8px;
+            overflow-x: auto;
         }
         .title {
             font-size: 2em;
@@ -43,11 +43,13 @@
         }
         .form-group input[type="text"],
         .form-group input[type="number"] {
-            width: calc(100% - 20px);
+            width: 100% ;
+            max-width: 400px;
             padding: 10px;
             border: 1px solid #ddd;
             border-radius: 5px;
             font-size: 1em;
+            box-sizing: border-box;
         }
         .form-group button {
             padding: 10px 20px;
@@ -62,10 +64,20 @@
         .form-group button:hover {
             background-color: #0056b3;
         }
+
+        .timetable-wrapper{
+            width: 100%;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+
+
         table {
             width: 100%;
             border-collapse: collapse;
             margin: 20px 0;
+            /* overflow-x: auto; */
+            display: block;
         }
         th, td {
             border: 1px solid #ddd;
@@ -76,6 +88,23 @@
             background-color: #f2f2f2;
             font-weight: 700;
         }
+
+
+        @media (max-width: 768px) {
+            .title {
+                font-size: 1.5em; /* Adjust title font size for mobile */
+            }
+            .form-group input[type="text"],
+            .form-group input[type="number"] {
+                max-width: 100%; /* Ensure inputs use full width on mobile */
+            }
+        }
+
+
+
+
+
+
         /* .download-link {
             display: block;
             margin: 20px 0;
@@ -95,7 +124,7 @@
 <body>
 
 <div class="container">
-    <div class="title">Enter Your Courses</div>
+    <div class="title">Customized Time Table</div>
 
     <div class="form-group">
         <label for="numCourses">Number of Courses:</label>
@@ -109,7 +138,7 @@
         <button onclick="generateTimetable()">Generate Timetable</button>
     </div>
 
-    <div id="timetableContainer"></div>
+    <div id="timetableContainer" class="timetable-wrapper"></div>
 
     <!-- Datalist for course suggestions -->
     <datalist id="courseSuggestions"></datalist>
@@ -293,6 +322,7 @@
         </tr>
         </tbody>
     </table>
+    
     `;
 
     function generateInputFields() {
@@ -371,7 +401,7 @@ function hasInvalidCourses() {
 
     function generateTimetable() {
 
-
+     
 
         if (hasInvalidCourses()) {
         alert('Please correct all "Course not Found" errors before generating the timetable.');
