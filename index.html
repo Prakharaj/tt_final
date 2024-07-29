@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Personalized Timetable Generator</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+        
+        body {
+            font-family: 'Roboto', sans-serif;
+            background-color: #6868b7;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .container {
+            width: 90%;
+            max-width: 800px;
+            background: white;
+            padding: 20px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            margin-top: 50px;
+            border-radius: 8px;
+        }
+        .title {
+            font-size: 2em;
+            text-align: center;
+            margin: 20px 0;
+            color: #333;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 500;
+            color: #555;
+        }
+        .form-group input[type="text"],
+        .form-group input[type="number"] {
+            width: calc(100% - 60px);
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 1em;
+        }
+        .form-group button {
+            padding: 10px 20px;
+            background-color: #007bff;
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 1em;
+            font-weight: 500;
+        }
+        .form-group button:hover {
+            background-color: #0056b3;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            text-align: center;
+            padding: 12px;
+        }
+        th {
+            background-color: #f2f2f2;
+            font-weight: 700;
+        }
+        .download-link {
+            display: block;
+            margin: 20px 0;
+            text-align: center;
+            font-size: 1.2em;
+            color: #007bff;
+            text-decoration: none;
+            font-weight: 500;
+        }
+        .download-link:hover {
+            text-decoration: underline;
+        }
+    </style>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
+</head>
+<body>
+
+<div class="container">
+    <div class="title">Enter Your Courses</div>
+
+    <div class="form-group">
+        <label for="numCourses">Number of Courses:</label>
+        <input type="number" id="numCourses" min="1" required>
+        <button onclick="generateInputFields()">Generate Fields</button>
+    </div>
+
+    <div id="courseFields"></div>
+
+    <div class="form-group">
+        <button onclick="generateTimetable()">Generate Timetable</button>
+    </div>
+
+    <div id="timetableContainer"></div>
+
+    <!-- Datalist for course suggestions -->
+    <datalist id="courseSuggestions"></datalist>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script>
+   const allCourses = [
+        'Blockchain and Web3 Development', 
+        'Data Analytics I', 
+        'Earthquake Resistant Design of Masonry Structures', 
+        'Probability and Random Processes', 
+        'Thinking and Knowing in the Human Sciences – III', 
+        'CMOS References and Regulators',
+        'Introduction to Biology', 
+        'Introduction to Quantum Field Theory', 
+        'Operating Systems and Networks (OSN)', 
+        'Signal Processing', 
+        'Structural Dynamics', 
+        'Topics in Nanosciences', 
+        'Retrofit of Existing Infrastructure(H2)', 
+        'Software Systems Development',
+        'Advanced Computer Architecture', 
+        'Behavioral Research & Experimental Design', 
+        'Digital Image Processing', 
+        'Distributed Systems', 
+        'Environmental Science & Technology', 
+        'Language and Society', 
+        'Theory of Elasticity', 
+        'Science 1', 
+        'Quantum Mechanics', 
+        'Hydrological Modelling and Software Development',
+        'Learning and Memory', 
+        'Structural Engineering Design Studio', 
+        'Topics in Applied Optimization', 
+        'Quantum Information Theory', 
+        'Open Quantum Systems and Quantum Thermodynamics',
+        'Advanced Computer Networks', 
+        'Automata Theory (H1)', 
+        'Bioinformatics (H1)', 
+        'Data and Applications (H2)', 
+        'Information Theory', 
+        'Introduction to Remote Sensing', 
+        'MCS 1 - Probability and Statistics (H1)', 
+        'MCS 2 - Linear Algebra (H2)', 
+        'Structural Safety of Built Infrastructure', 
+        'Systems Biology (H2)', 
+        'Principles of Semiconductor Devices', 
+        'Information Retrieval & Extraction', 
+        'Wireless Communications',
+        'Introduction to Economics', 
+        'Introduction to Film Studies', 
+        'Intro to Psychology',
+        'Advanced Operating Systems', 
+        'Chemistry Topics for Engineers', 
+        'Computer Problem Solving', 
+        'Physics of Early Universe', 
+        'Software Quality Engineering',
+        'Advanced Design of Steel Structures', 
+        'Algorithm Analysis and Design', 
+        'Chemical Kinetics and Reaction Dynamics (H2)', 
+        'Computational Linguistics II', 
+        'Design for Testability', 
+        'Fairness, Privacy and Ethics in AI', 
+        'Foundations for Signal Processing and Communication', 
+        'Modern Complexity Theory', 
+        'Spectroscopy(H1)', 
+        'Spatial Informatics',
+        'Applied Ethics', 
+        'Biomolecular Structure Interaction & Dynamics', 
+        'Data Structures & Algorithms for Problem Solving', 
+        'Entropy and Information', 
+        'Finite Element Methods', 
+        'Thinking and Knowing in the Human Sciences – II', 
+        'Geospatial Technology for Disaster Risk Modelling',
+        'Algorithms and Operating Systems', 
+        'IoT Workshop', 
+        'Intro to Cognitive Science', 
+        'Introduction to Neural and Cognitive Modeling', 
+        'Mobile Robotics', 
+        'Research in Information Security', 
+        'Signal Detection and Estimation Theory', 
+        'Systems Thinking', 
+        'Design for Social Innovation', 
+        'Speech Analysis and Linguistics',
+        'Basics of Ethics (H1)', 
+        'Gender and Society', 
+        'Introduction to Philosophy', 
+        'Music Workshop', 
+        'Introduction to Politics', 
+        'CASE Seminar', 
+        'Human Computer Interaction (H2)',
+        'Statistical Methods in AI (SMAI)',
+        'Basics of Ethics (H2)', 
+        'Introduction to History', 
+        'Work, Entrepreneurship and Technology in Contemporary Societies', 
+        'Readings from Hindi Literature', 
+        'Design Thinking - Research to Define (H1)', 
+        'Design Thinking - Idea to Evaluate (H2)',
+        'Advanced NLP', 
+        'Digital VLSI Design', 
+        'Modern Coding Theory', 
+        'Probability and Statistics', 
+        'VLSI Design', 
+        'Principles of Programming Languages', 
+        'Robotics: Dynamics and Control', 
+        'Product Management 101 (H1)', 
+        'User Research Methods (H2)', 
+        'Product Marketing'
+    ];
+
+
+    const timetableHTML = `
+    <div class="title">Lecture timetable for the courses of Monsoon 2024</div>
+    <table>
+        <thead>
+            <tr>
+                <th></th>
+                <th>8:30-9:55AM</th>
+                <th>10:05-11:30AM</th>
+                <th>11:40-1:05PM</th>
+                <th>2:00-3:25PM</th>
+                <th>3:35-5:00PM</th>
+                <th>5:10-6:40PM</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <th>Mon</th>
+            <td>Blockchain and Web3 Development, Data Analytics I, Earthquake Resistant Design of Masonry Structures, Probability and Random Processes, Thinking and Knowing in the Human Sciences – III, CMOS References and Regulators</td>
+            <td>Introduction to Biology, Introduction to Quantum Field Theory, Operating Systems and Networks (OSN), Signal Processing, Structural Dynamics, Topics in Nanosciences, Retrofit of Existing Infrastructure(H2), Software Systems Development</td>
+            <td>Advanced Computer Architecture, Behavioral Research & Experimental Design, Digital Image Processing, Distributed Systems, Environmental Science & Technology, Language and Society, Theory of Elasticity, Science 1, Quantum Mechanics, Hydrological modelling and Software Development</td>
+            <td>Learning and Memory, Structural Engineering Design Studio, Topics in Applied Optimization, Quantum Information Theory, Open Quantum Systems and Quantum Thermodynamics</td>
+            <td>Advanced Computer Networks, Automata Theory (H1), Bioinformatics (H1), Data and Applications (H2), Information Theory, Introduction to Remote Sensing MCS 1-Probability and Statistics (H1), MCS 2 - Linear Algebra (H2), Structural Safety of Built Infrastructure, Systems Biology (H2), Principles of Semiconductor Devices, Information Retrieval & Extraction, Wireless Communications</td>
+            <td>Introduction to Economics, Introduction to Film Studies, Intro to Psychology</td>
+        </tr>
+        <tr>
+            <th>Tue</th>
+            <td>Advanced Operating Systems, Chemistry Topics for Engineers, Computer Problem Solving, Physics of Early Universe, Software Quality Engineering</td>
+            <td>Advanced Design of Steel Structures, Algorithm Analysis and Design, Chemical Kinetics and Reaction Dynamics (H2), Computational Linguistics II, Design for Testability, Fairness, Privacy and Ethics in AI, Foundations for Signal Processing and Communication, Modern Complexity Theory, Spectroscopy(H1), Spatial Informatics</td>
+            <td>Applied Ethics, Biomolecular Structure Interaction & Dynamics, Data Structures & Algorithms for Problem Solving, Entropy and Information, Finite Element Methods, Thinking and Knowing in the Human Sciences – II, Geospatial Technology for Disaster Risk Modelling</td>
+            <td>Algorithms and Operating Systems, IoT Workshop, Intro to Cognitive Science, Introduction to Neural and Cognitive Modeling, Mobile Robotics, Signal Detection and Estimation Theory, Systems Thinking, Design for Social Innovation, Speech Analysis and Linguistics</td>
+            <td>Basics of Ethics (H1), Gender and Society, Introduction to Philosophy, Research in Information Security, Music Workshop, Introduction to Politics</td>
+            <td>Statistical Methods in AI (SMAI) </td>
+        </tr>
+        <tr>
+            <th>Wed</th>
+            <td>Basics of Ethics (H2), Introduction to History, Work, Entrepreneurship and Technology in Contemporary Societies, Readings from Hindi Literature, Design Thinking - Research to Define (H1), Design Thinking - Idea to Evaluate (H2)</td>
+            <td>Advanced NLP, Digital VLSI Design, Modern Coding Theory, Probability and Statistics, VLSI Design, Principles of Programming Languages, Robotics: Dynamics and Control, Product Management 101 (H1), User Research Methods (H2), Product Marketing</td>
+            <td>Human Computer Interaction (H2)</td>
+            <td></td>
+            <td></td>
+            <td></td>
+        </tr>
+        <tr>
+            <th>Thu</th>
+            <td>Blockchain and Web3 Development, Data Analytics I, Earthquake Resistant Design of Masonry Structures, Probability and Random Processes, Thinking and Knowing in the Human Sciences – III, CMOS References and Regulators</td>
+            <td>Introduction to Biology, Introduction to Quantum Field Theory, Operating Systems and Networks (OSN), Signal Processing, Structural Dynamics, Topics in Nanosciences, Retrofit of Existing Infrastructure(H2), Software Systems Development</td>
+            <td>Advanced Computer Architecture, Behavioral Research & Experimental Design, Digital Image Processing, Distributed Systems, Environmental Science & Technology, Language and Society, Theory of Elasticity, Science 1, Quantum Mechanics, Hydrological modelling and Software Development</td>
+            <td>Learning and Memory, Structural Engineering Design Studio, Topics in Applied Optimization, Quantum Information Theory, Open Quantum Systems and Quantum Thermodynamics</td>
+            <td>Advanced Computer Networks, Automata Theory (H1), Bioinformatics (H1), Data and Applications (H2), Information Theory, Introduction to Remote Sensing MCS 1-Probability and Statistics (H1), MCS 2 - Linear Algebra (H2), Structural Safety of Built Infrastructure, Systems Biology (H2), Principles of Semiconductor Devices, Information Retrieval & Extraction, Wireless Communications</td>
+            <td>Introduction to Economics, Introduction to Film Studies, Intro to Psychology</td>
+        </tr>
+        <tr>
+            <th>Fri</th>
+            <td>Advanced Operating Systems, Chemistry Topics for Engineers, Computer Problem Solving, Physics of Early Universe, Software Quality Engineering</td>
+            <td>Advanced Design of Steel Structures, Algorithm Analysis and Design, Chemical Kinetics and Reaction Dynamics (H2), Computational Linguistics II, Design for Testability, Fairness, Privacy and Ethics in AI, Foundations for Signal Processing and Communication, Modern Complexity Theory, Spectroscopy(H1), Spatial Informatics</td>
+            <td>Applied Ethics, Biomolecular Structure Interaction & Dynamics, Data Structures & Algorithms for Problem Solving, Entropy and Information, Finite Element Methods, Thinking and Knowing in the Human Sciences – II, Geospatial Technology for Disaster Risk Modelling</td>
+            <td>Algorithms and Operating Systems, IoT Workshop, Intro to Cognitive Science, Introduction to Neural and Cognitive Modeling, Mobile Robotics, Research in Information Security, Signal Detection and Estimation Theory, Systems Thinking, Design for Social Innovation, Speech Analysis and Linguistics</td>
+            <td>Basics of Ethics (H1), Gender and Society, Introduction to Philosophy, Research in Information Security, Music Workshop, Introduction to Politics, CASE Seminar</td>
+            <td>Statistical Methods in AI (SMAI)</td>
+        </tr>
+        <tr>
+            <th>Sat</th>
+            <td>Basics of Ethics (H2), Introduction to History, Work, Entrepreneurship and Technology in Contemporary Societies, Readings from Hindi Literature, Design Thinking - Research to Define (H1), Design Thinking - Idea to Evaluate (H2)</td>
+            <td>Advanced NLP, Digital VLSI Design, Modern Coding Theory, Probability and Statistics, VLSI Design, Principles of Programming Languages, Robotics: Dynamics and Control, Product Management 101 (H1), User Research Methods (H2), Product Marketing</td>
+            <td>Human Computer Interaction (H2)</td>
+            <td></td>
+            <td></td>
+            <td></td>
+        </tr>
+        </tbody>
+    </table>
+    `;
+
+    function generateInputFields() {
+        const numCourses = document.getElementById('numCourses').value;
+        const courseFields = document.getElementById('courseFields');
+        courseFields.innerHTML = '';
+
+        for (let i = 0; i < numCourses; i++) {
+            const fieldGroup = document.createElement('div');
+            fieldGroup.classList.add('form-group');
+
+            const label = document.createElement('label');
+            label.textContent = `Course ${i + 1}:`;
+            fieldGroup.appendChild(label);
+
+            const input = document.createElement('input');
+            input.type = 'text';
+            input.classList.add('courseInput');
+            input.setAttribute('list', 'courseSuggestions');
+            input.addEventListener('input', showSuggestions);
+            fieldGroup.appendChild(input);
+
+            courseFields.appendChild(fieldGroup);
+        }
+    }
+
+    function showSuggestions(event) {
+        const input = event.target;
+        const value = input.value.toLowerCase();
+        const suggestions = document.getElementById('courseSuggestions');
+
+        suggestions.innerHTML = '';
+
+        if (value) {
+            const filteredCourses = allCourses.filter(course => 
+                course.toLowerCase().includes(value)
+            );
+
+            filteredCourses.forEach(course => {
+                const option = document.createElement('option');
+                option.value = course;
+                suggestions.appendChild(option);
+            });
+        }
+    }
+
+    function generateTimetable() {
+        const courseInputs = document.querySelectorAll('.courseInput');
+        const courses = Array.from(courseInputs).map(input => input.value);
+
+        let filteredTimetable = timetableHTML;
+        const parser = new DOMParser();
+        const dom = parser.parseFromString(filteredTimetable, 'text/html');
+        const rows = dom.querySelectorAll('tbody tr');
+
+        rows.forEach(row => {
+            const cells = row.querySelectorAll('td');
+            cells.forEach(cell => {
+                if (cell.textContent.trim()) {
+                    const cellCourses = cell.textContent.split(',').map(course => course.trim());
+                    const matchingCourses = cellCourses.filter(course => courses.includes(course));
+                    cell.textContent = matchingCourses.join(', ');
+                }
+            });
+        });
+
+        const timetableContainer = document.getElementById('timetableContainer');
+        timetableContainer.innerHTML = dom.body.innerHTML;
+
+        const downloadLink = document.createElement('a');
+        downloadLink.textContent = 'Download PDF';
+        downloadLink.classList.add('download-link');
+        downloadLink.onclick = () => downloadPDF(dom);
+        timetableContainer.appendChild(downloadLink);
+    }
+
+    async function downloadPDF(dom) {
+    const { jsPDF } = window.jspdf;
+    const pdf = new jsPDF();
+
+    // Use the html method to convert the HTML to PDF
+    pdf.html(dom.body, {
+        callback: function (pdf) {
+            pdf.save('timetable.pdf');
+        },
+        x: 10,
+        y: 10,
+        html2canvas: { scale: 2 }, // Adjust the scale if needed
+    });
+}
+
+    
+</script>
+</body>
+</html>
