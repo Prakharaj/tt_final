@@ -69,6 +69,7 @@
             width: 100%;
             overflow-x: auto;
             -webkit-overflow-scrolling: touch;
+            max-height: none;
         }
 
 
@@ -77,7 +78,7 @@
             border-collapse: collapse;
             margin: 20px 0;
             /* overflow-x: auto; */
-            display: block;
+            /* display: block; */
         }
         th, td {
             border: 1px solid #ddd;
@@ -279,7 +280,7 @@
         <tbody>
             <tr>
                 <th>Mon</th>
-            <td>Blockchain and Web3 Development, Data Analytics I, Earthquake Resistant Design of Masonry Structures, Probability and Random Processes (PRP), Thinking and Knowing in the Human Sciences III, CMOS References and Regulators </td>
+            <td>Blockchain and Web3 Development, Data Analytics I, Earthquake Resistant Design of Masonry Structures, Probability and Random Processes (PRP), Thinking and Knowing in the Human Sciences – III, CMOS References and Regulators </td>
             <td>Introduction to Biology, Introduction to Quantum Field Theory, Operating Systems and Networks (OSN), Signal Processing, Structural Dynamics, Topics in Nanosciences, Retrofit of Existing Infrastructure(H2), Software Systems Development</td>
             <td>Advanced Computer Architecture, Behavioral Research & Experimental Design, Digital Image Processing (DIP), Distributed Systems, Environmental Science & Technology, Language and Society, Theory of Elasticity, Science 1, Quantum Mechanics, Hydrological modelling and Software Development</td>
             <td>Learning and Memory, Structural Engineering Design Studio, Topics in Applied Optimization, Quantum Information Theory, Open Quantum Systems and Quantum Thermodynamics</td>
@@ -672,8 +673,22 @@ document.getElementById('numCourses').addEventListener('keypress', function (eve
     }
 });
 
+
+
+
 document.getElementById('screenshotButton').addEventListener('click', function () {
-    html2canvas(document.getElementById('timetableContainer')).then(canvas => {
+    const timetableContainer = document.getElementById('timetableContainer');
+    const originalWidth = timetableContainer.scrollWidth;
+    const originalHeight = timetableContainer.scrollHeight;
+
+    html2canvas(timetableContainer, {
+        width: originalWidth,
+        height: originalHeight,
+        scrollX: -window.scrollX,
+        scrollY: -window.scrollY,
+        windowWidth: originalWidth,
+        windowHeight: originalHeight
+    }).then(canvas => {
         const imgData = canvas.toDataURL('image/png');
         const { jsPDF } = window.jspdf;
         const pdf = new jsPDF();
@@ -696,6 +711,7 @@ document.getElementById('screenshotButton').addEventListener('click', function (
         pdf.save('timetable.pdf');
     });
 });
+
 
 
 
