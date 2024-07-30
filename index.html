@@ -78,7 +78,7 @@
             border-collapse: collapse;
             margin: 20px 0;
             /* overflow-x: auto; */
-            /* display: block; */
+            display: block;
         }
         th, td {
             border: 1px solid #ddd;
@@ -682,13 +682,19 @@ document.getElementById('screenshotButton').addEventListener('click', function (
     const originalHeight = timetableContainer.scrollHeight;
 
     html2canvas(timetableContainer, {
+        scale: 2,
         width: originalWidth,
         height: originalHeight,
         scrollX: -window.scrollX,
         scrollY: -window.scrollY,
         windowWidth: originalWidth,
-        windowHeight: originalHeight
+        windowHeight: originalHeight,
+        useCORS: true
     }).then(canvas => {
+
+        canvas.width = originalWidth * 1.5;
+        canvas.height = originalHeight * 1.5;
+        
         const imgData = canvas.toDataURL('image/png');
         const { jsPDF } = window.jspdf;
         const pdf = new jsPDF();
