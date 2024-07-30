@@ -675,6 +675,7 @@ document.getElementById('numCourses').addEventListener('keypress', function (eve
 
 
 
+
 document.getElementById('screenshotButton').addEventListener('click', function () {
     const timetableContainer = document.getElementById('timetableContainer');
 
@@ -687,7 +688,7 @@ document.getElementById('screenshotButton').addEventListener('click', function (
         height: originalHeight,
         scrollX: 0,
         scrollY: 0,
-        useCORS: true,
+       
         scale: 2 // Increase the scale for better quality
     }).then(canvas => {
         const imgData = canvas.toDataURL('image/png');
@@ -695,7 +696,7 @@ document.getElementById('screenshotButton').addEventListener('click', function (
         const pdf = new jsPDF({
             orientation: 'portrait',
             unit: 'mm',
-            format: [canvas.width * 0.75, canvas.height * 0.75] // Adjust size to fit PDF
+            format: [canvas.width , canvas.height ] // Adjust size to fit PDF
         });
         const imgWidth = pdf.internal.pageSize.width;
         const imgHeight = canvas.height * imgWidth / canvas.width;
