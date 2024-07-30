@@ -673,8 +673,15 @@ document.getElementById('numCourses').addEventListener('keypress', function (eve
     }
 });
 
+
+
+
+
 document.getElementById('screenshotButton').addEventListener('click', function () {
     const timetableContainer = document.getElementById('timetableContainer');
+    
+    // Define a scaling factor (e.g., 0.5 for half size, 2 for double size)
+    const scaleFactor = 1.2; // Adjust this value to scale the screenshot size
 
     // Create a full-width clone of the timetable container
     const clone = timetableContainer.cloneNode(true);
@@ -694,7 +701,7 @@ document.getElementById('screenshotButton').addEventListener('click', function (
 
     html2canvas(clone, { 
         scrollX: 0, 
-        scrollY: -window.scrollY,
+        scrollY: 0, // Use scrollX and scrollY as 0
         useCORS: true,
         allowTaint: true,
         backgroundColor: null // Set background color to null to handle transparent backgrounds
@@ -703,28 +710,20 @@ document.getElementById('screenshotButton').addEventListener('click', function (
 
         const imgData = canvas.toDataURL('image/png');
         const { jsPDF } = window.jspdf;
-        const pdf = new jsPDF();
-        const imgWidth = 210;
-        const pageHeight = 295;
-        const imgHeight = canvas.height * imgWidth / canvas.width;
-        let heightLeft = imgHeight;
-        let position = 0;
+        const pdf = new jsPDF({
+            orientation: 'landscape',
+            unit: 'px',
+            format: [cloneRect.width * scaleFactor, cloneRect.height * scaleFactor] // Scale the dimensions
+        });
 
-        pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
-        heightLeft -= pageHeight;
+        const imgWidth = cloneRect.width * scaleFactor;
+        const imgHeight = cloneRect.height * scaleFactor;
 
-        while (heightLeft >= 0) {
-            position = heightLeft - imgHeight;
-            pdf.addPage();
-            pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
-            heightLeft -= pageHeight;
-        }
-
+        // Add image to PDF with scaled dimensions
+        pdf.addImage(imgData, 'PNG', 0, 0, imgWidth, imgHeight);
         pdf.save('timetable.pdf');
     });
 });
-
-
 
     
 </script>
