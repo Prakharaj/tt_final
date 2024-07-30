@@ -675,42 +675,39 @@ document.getElementById('numCourses').addEventListener('keypress', function (eve
 
 
 
-
 document.getElementById('screenshotButton').addEventListener('click', function () {
     const timetableContainer = document.getElementById('timetableContainer');
-
-    // Get the full width and height of the container
-    const originalWidth = timetableContainer.scrollWidth;
-    const originalHeight = timetableContainer.scrollHeight;
-
-    html2canvas(timetableContainer, {
-        width: originalWidth,
-        height: originalHeight,
-        scrollX: 0,
-        scrollY: 0,
-       
-        scale: 2 // Increase the scale for better quality
+    
+    html2canvas(timetableContainer, { 
+        scrollX: 0, 
+        scrollY: -window.scrollY, // Adjust for vertical scroll
+        useCORS: true,
+        allowTaint: true
     }).then(canvas => {
         const imgData = canvas.toDataURL('image/png');
         const { jsPDF } = window.jspdf;
-        const pdf = new jsPDF({
-            orientation: 'portrait',
-            unit: 'mm',
-            format: [canvas.width , canvas.height ] // Adjust size to fit PDF
-        });
-        const imgWidth = pdf.internal.pageSize.width;
+        const pdf = new jsPDF();
+        const imgWidth = 210;
+        const pageHeight = 295;
         const imgHeight = canvas.height * imgWidth / canvas.width;
         let heightLeft = imgHeight;
         let position = 0;
 
-        pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
-        heightLeft -= pdf.internal.pageSize.height;
+        // Adjust to fit the entire width and height in the PDF
+        const pdfWidth = pdf.internal.pageSize.getWidth();
+        const pdfHeight = pdf.internal.pageSize.getHeight();
+        const aspectRatio = canvas.width / canvas.height;
+        
+        // Adding the first page
+        pdf.addImage(imgData, 'PNG', 0, position, pdfWidth, pdfWidth / aspectRatio);
+        heightLeft -= pdfHeight;
 
+        // Adding subsequent pages
         while (heightLeft >= 0) {
-            position = heightLeft - imgHeight;
+            position = heightLeft - pdfHeight;
             pdf.addPage();
-            pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
-            heightLeft -= pdf.internal.pageSize.height;
+            pdf.addImage(imgData, 'PNG', 0, position, pdfWidth, pdfWidth / aspectRatio);
+            heightLeft -= pdfHeight;
         }
 
         pdf.save('timetable.pdf');
