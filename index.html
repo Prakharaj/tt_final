@@ -674,13 +674,12 @@ document.getElementById('numCourses').addEventListener('keypress', function (eve
 });
 
 
-
 document.getElementById('screenshotButton').addEventListener('click', function () {
     const timetableContainer = document.getElementById('timetableContainer');
     
     html2canvas(timetableContainer, { 
         scrollX: 0, 
-        scrollY: -window.scrollY, // Adjust for vertical scroll
+        scrollY: -window.scrollY, // Adjust for the vertical scroll
         useCORS: true,
         allowTaint: true
     }).then(canvas => {
@@ -693,27 +692,19 @@ document.getElementById('screenshotButton').addEventListener('click', function (
         let heightLeft = imgHeight;
         let position = 0;
 
-        // Adjust to fit the entire width and height in the PDF
-        const pdfWidth = pdf.internal.pageSize.getWidth();
-        const pdfHeight = pdf.internal.pageSize.getHeight();
-        const aspectRatio = canvas.width / canvas.height;
-        
-        // Adding the first page
-        pdf.addImage(imgData, 'PNG', 0, position, pdfWidth, pdfWidth / aspectRatio);
-        heightLeft -= pdfHeight;
+        pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
+        heightLeft -= pageHeight;
 
-        // Adding subsequent pages
         while (heightLeft >= 0) {
-            position = heightLeft - pdfHeight;
+            position = heightLeft - imgHeight;
             pdf.addPage();
-            pdf.addImage(imgData, 'PNG', 0, position, pdfWidth, pdfWidth / aspectRatio);
-            heightLeft -= pdfHeight;
+            pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
+            heightLeft -= pageHeight;
         }
 
         pdf.save('timetable.pdf');
     });
 });
-
 
 
 
