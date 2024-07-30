@@ -412,10 +412,7 @@ function hasInvalidCourses() {
     const courseInputs = document.querySelectorAll('.courseInput');
     const courses = Array.from(courseInputs).map(input => input.value.trim());
 
-    // Escape specific course name to use in regex
-    const specificCourseName = 'Work, Entrepreneurship and Technology in Contemporary Societies';
-    const placeholder = 'Work|Entrepreneurship and Technology in Contemporary Societies';
-
+    
     let filteredTimetable = timetableHTML;
     const parser = new DOMParser();
     const dom = parser.parseFromString(filteredTimetable, 'text/html');
@@ -424,29 +421,14 @@ function hasInvalidCourses() {
     rows.forEach(row => {
         const cells = row.querySelectorAll('td');
         cells.forEach(cell => {
+
             if (cell.textContent.trim()) {
-                // Replace the specific course name with a placeholder
-                let cellContent = cell.textContent.replace(
-                    new RegExp(specificCourseName, 'g'),
-                    placeholder
-                );
-
-                // Split the cell content by commas
-                const cellCourses = cellContent.split(',').map(course => course.trim());
-
-                // Filter courses to match user input
-                const matchingCourses = cellCourses.filter(course => courses.some(userCourse => {
-                    // Restore the original comma in the specific course name
-                    const restoredCourse = course.replace(placeholder, specificCourseName);
-                    return userCourse === restoredCourse;
-                }));
-
-                // Join the matching courses and replace placeholder back to original
-                cell.textContent = matchingCourses.join(', ').replace(
-                    new RegExp(placeholder, 'g'),
-                    specificCourseName
-                );
-            }
+                    const cellCourses = cell.textContent.split(',').map(course => course.trim());
+                    const matchingCourses = cellCourses.filter(course => courses.includes(course));
+                    cell.textContent = matchingCourses.join(', ');
+                }
+            
+           
         });
     });
 
